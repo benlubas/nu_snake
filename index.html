@@ -1,8 +1,25 @@
 <body>
+
+  <div class="instructions">
+    click to draw. a = Amal, b = Ben Lerner. Do you know the kunami code?
+  </div>
   <style>
     *{ 
       padding: 0; 
       margin: 0; 
+    }
+    canvas {
+      position: relative; 
+    }
+    .instructions {
+      color: white; 
+      position: absolute;
+      z-index: 2; 
+      top: 10px; 
+      left: 10px; 
+      font-size: 1.2rem; 
+      font-family:'Courier New', Courier, monospace; 
+      pointer-events: none;
     }
   </style>
   
