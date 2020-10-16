@@ -1,82 +1,120 @@
 <body>
-
-  <div class="instructions">
-    click to draw. a = Amal, b = Ben Lerner. Do you know the kunami code?
+  <div class="text">
+    <div class="instructions">
+      click to draw | a = Amal | b = Ben Lerner | Left and right arrows to
+      adjust scale
+    </div>
+    <div class="scale">
+      Scale:
+      <span id="scaleDisp"></span>
+    </div>
   </div>
   <style>
-    *{ 
-      padding: 0; 
-      margin: 0; 
+    * {
+      padding: 0;
+      margin: 0;
     }
     canvas {
-      position: relative; 
+      position: relative;
     }
-    .instructions {
-      color: white; 
+    .text div {
+      padding: 10px;
+    }
+    .text {
+      color: white;
       position: absolute;
-      z-index: 2; 
-      top: 10px; 
-      left: 10px; 
-      font-size: 1.2rem; 
-      font-family:'Courier New', Courier, monospace; 
+      z-index: 2;
+      top: 10px;
+      left: 10px;
+      font-size: 1.2rem;
+      font-family: "Courier New", Courier, monospace;
       pointer-events: none;
+      display: flex;
     }
   </style>
-  
-  <script>
-    let drawing = false; 
-    let hist = []; 
 
-    let mouseX, mouseY; 
+  <script>
+    let drawing = false;
+    let hist = [];
+    let scale = 1;
+    let scaleMin = 0.25;
+    let scaleMax = 2.5;
+    let scaleStep = 0.01;
+    let scaleElem = document.querySelector("#scaleDisp");
+    scaleElem.textContent = scale;
+
+    let mouseX, mouseY;
 
     let images = [
       {
-        src: "amal.png", 
-        key: "a", 
-      }, 
+        src: "amal.png",
+        key: "a",
+      },
       {
-        src: "lerner.png", 
-        key: "b", 
-      }, 
-    ]; 
-    let img = new Image(); 
-    img.src = "amal.png"; 
+        src: "lerner.png",
+        key: "b",
+      },
+    ];
+    let img = new Image();
+    img.src = "amal.png";
 
     const createCanvas = (width, height) => {
-      let canvas = document.createElement("canvas"); 
+      let canvas = document.createElement("canvas");
       canvas.setAttribute("width", width);
-      canvas.setAttribute("height", height); 
-      document.body.appendChild(canvas); 
-      let ctx = canvas.getContext('2d'); 
-      return [canvas, ctx]; 
-    }
+      canvas.setAttribute("height", height);
+      document.body.appendChild(canvas);
+      let ctx = canvas.getContext("2d");
+      return [canvas, ctx];
+    };
 
-    let [canvas, ctx] = createCanvas(window.innerWidth, window.innerHeight); 
-    ctx.rect(0, 0, window.innerWidth, window.innerHeight); 
-    ctx.fillStyle = "#212121"; 
-    ctx.fill(); 
+    let [canvas, ctx] = createCanvas(window.innerWidth, window.innerHeight);
+    ctx.rect(0, 0, window.innerWidth, window.innerHeight);
+    ctx.fillStyle = "#212121";
+    ctx.fill();
 
-    document.addEventListener("mousedown", (e) => (drawing = true)); 
+    document.addEventListener("mousedown", (e) => (drawing = true));
     window.addEventListener("mouseup", (e) => (drawing = false));
     document.addEventListener("mousemove", (e) => {
-      mouseX = e.offsetX; 
-      mouseY = e.offsetY; 
+      mouseX = e.offsetX;
+      mouseY = e.offsetY;
     });
-    document.addEventListener("keydown", e => {
-      hist.push(e.key); 
-      let [newImg] = images.filter(i => i.key === e.key); 
-      img.src = newImg ? newImg.src : checkKunami(hist) ? "aoun.png" : img.src; 
-    })
+    document.addEventListener("keydown", (e) => {
+      hist.push(e.key);
+      if (e.key === "ArrowRight") {
+        scale = scale < scaleMax ? scale + scaleStep : scale;
+        scaleElem.textContent = scale.toFixed(2);
+        console.log(scale);
+      } else if (e.key === "ArrowLeft") {
+        scale = scale > scaleMin ? scale - scaleStep : scale;
+        scaleElem.textContent = scale.toFixed(2);
+      } else {
+        let [newImg] = images.filter((i) => i.key === e.key);
+        img.src = newImg
+          ? newImg.src
+          : checkKunami(hist)
+          ? "aoun.png"
+          : img.src;
+      }
+    });
 
-    const checkKunami = arr => 
-      -1 != arr.join(" ")
-      .search(
-        "ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a"
-      ); 
-    
+    const checkKunami = (arr) =>
+      -1 !=
+      arr
+        .join(" ")
+        .search(
+          "ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a"
+        );
+
     setInterval(() => {
-      drawing ? ctx.drawImage(img, mouseX - img.width / 2, mouseY - img.height / 2) : null
-    }, 1000/ 240)
-
+      drawing
+        ? ctx.drawImage(
+            img,
+            mouseX - (img.width * scale) / 2,
+            mouseY - (img.height * scale) / 2,
+            img.width * scale,
+            img.height * scale
+          )
+        : null;
+    }, 1000 / 240);
   </script>
 </body>
