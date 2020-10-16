@@ -1,0 +1,59 @@
+<body>
+  
+  <script>
+    let drawing = false; 
+    let hist = []; 
+
+    let mouseX, mouseY; 
+
+    let images = [
+      {
+        src: "amal.png", 
+        key: "a", 
+      }, 
+      {
+        src: "lerner.png", 
+        key: "b", 
+      }, 
+    ]; 
+    let img = new Image(); 
+    img.src = "amal.png"; 
+
+    const createCanvas = (width, height) => {
+      let canvas = document.createElement("canvas"); 
+      canvas.setAttribute("width", width);
+      canvas.setAttribute("height", height); 
+      document.body.appendChild(canvas); 
+      let ctx = canvas.getContext('2d'); 
+      return [canvas, ctx]; 
+    }
+
+    let [canvas, ctx] = createCanvas(window.innerWidth, window.innerHeight); 
+    ctx.rect(0, 0, window.innerWidth, window.innerHeight); 
+    ctx.fillStyle = "#212121"; 
+    ctx.fill(); 
+
+    document.addEventListener("mousedown", (e) => (drawing = true)); 
+    window.addEventListener("mouseup", (e) => (drawing = false));
+    document.addEventListener("mousemove", (e) => {
+      mouseX = e.offsetX; 
+      mouseY = e.offsetY; 
+    });
+    document.addEventListener("keydown", e => {
+      hist.push(e.key); 
+      let [newImg] = images.filter(i => i.key === e.key); 
+      img.src = newImg ? newImg.src : checkKunami(hist) ? "aoun.png" : img.src; 
+    })
+
+    const checkKunami = arr => 
+      -1 != arr.join(" ")
+      .search(
+        "ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a"
+      ); 
+    
+    setInterval(() => {
+      drawing ? ctx.drawImage(img, mouseX - img.width / 2, mouseY - img.height / 2) : null
+    }, 1000/ 240)
+
+  </script>
+</body>
