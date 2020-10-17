@@ -1,21 +1,35 @@
 <body>
   <div class="text">
     <div class="instructions">
-      click to draw | a = Amal | b = Ben Lerner | Left and right arrows to
-      adjust scale
+      click to draw | a = Amal | b = Ben Lerner | Do you know the Kunami Code?
     </div>
     <div class="scale">
       Scale:
-      <span id="scaleDisp"></span>
+      <span id="scaleDisp">1.0</span>
+      <input
+        id="scale"
+        oninput="changeRange(this.value)"
+        type="range"
+        value="1.0"
+        min=".2"
+        max="10"
+        step=".1"
+      />
     </div>
   </div>
+  <img class="outline" src="amal.png" />
   <style>
     * {
       padding: 0;
       margin: 0;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     canvas {
       position: relative;
+    }
+    .scale {
+      pointer-events: all;
     }
     .text div {
       padding: 10px;
@@ -25,23 +39,41 @@
       position: absolute;
       z-index: 2;
       top: 10px;
-      left: 10px;
       font-size: 1.2rem;
       font-family: "Courier New", Courier, monospace;
       pointer-events: none;
       display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .outline {
+      position: absolute;
+      z-index: 5;
+      opacity: 0.1;
+      pointer-events: none;
     }
   </style>
 
   <script>
     let drawing = false;
     let hist = [];
-    let scale = 1;
-    let scaleMin = 0.25;
-    let scaleMax = 2.5;
+    let scale = 1.0;
+    let range;
+    let scaleMin = 0.2;
+    let scaleMax = 10;
     let scaleStep = 0.01;
-    let scaleElem = document.querySelector("#scaleDisp");
-    scaleElem.textContent = scale;
+    let scaleElem;
+    let outline;
+
+    outline = document.querySelector(".outline");
+    range = document.querySelector("#scale");
+    scaleElem = document.querySelector("#scaleDisp");
+    const changeRange = (val) => {
+      scale = parseFloat(val);
+      scaleElem.textContent = parseFloat(scale).toFixed(1);
+      outline.style.width = img.width * scale;
+      outline.style.height = img.height * scale;
+    };
 
     let mouseX, mouseY;
 
@@ -72,29 +104,17 @@
     ctx.fillStyle = "#212121";
     ctx.fill();
 
-    document.addEventListener("mousedown", (e) => (drawing = true));
+    canvas.addEventListener("mousedown", (e) => (drawing = true));
     window.addEventListener("mouseup", (e) => (drawing = false));
-    document.addEventListener("mousemove", (e) => {
+    canvas.addEventListener("mousemove", (e) => {
       mouseX = e.offsetX;
       mouseY = e.offsetY;
     });
     document.addEventListener("keydown", (e) => {
       hist.push(e.key);
-      if (e.key === "ArrowRight") {
-        scale = scale < scaleMax ? scale + scaleStep : scale;
-        scaleElem.textContent = scale.toFixed(2);
-        console.log(scale);
-      } else if (e.key === "ArrowLeft") {
-        scale = scale > scaleMin ? scale - scaleStep : scale;
-        scaleElem.textContent = scale.toFixed(2);
-      } else {
-        let [newImg] = images.filter((i) => i.key === e.key);
-        img.src = newImg
-          ? newImg.src
-          : checkKunami(hist)
-          ? "aoun.png"
-          : img.src;
-      }
+      let [newImg] = images.filter((i) => i.key === e.key);
+      img.src = newImg ? newImg.src : checkKunami(hist) ? "aoun.png" : img.src;
+      outline.setAttribute("src", img.src);
     });
 
     const checkKunami = (arr) =>
@@ -115,6 +135,8 @@
             img.height * scale
           )
         : null;
-    }, 1000 / 240);
+      outline.style.left = mouseX - (img.width * scale) / 2;
+      outline.style.top = mouseY - (img.height * scale) / 2;
+    }, 1000 / 200);
   </script>
 </body>
